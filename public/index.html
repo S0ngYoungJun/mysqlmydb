@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+    <h1>데이터 관리</h1>
+  
+    <!-- 데이터 추가 양식 -->
+    <h2>데이터 추가</h2>
+    <form id="addForm">
+      <input type="text" id="name" placeholder="이름" required>
+      <input type="text" id="email" placeholder="이메일" required>
+      <button type="submit">추가</button>
+    </form>
+  
+    <!-- 데이터 불러오기 버튼 및 결과 표시 -->
+    <h2>데이터 불러오기</h2>
+    <button id="loadDataBtn">데이터 불러오기</button>
+    <div id="dataResult"></div>
+  
+    <!-- 데이터 삭제 양식 -->
+    <h2>데이터 삭제</h2>
+    <form id="deleteForm">
+      <input type="text" id="deleteId" placeholder="ID" required>
+      <button type="submit">삭제</button>
+    </form>
+  
+    <script>
+      // 데이터 추가
+      document.getElementById('addForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+  
+        fetch('/data/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email }),
+        })
+          .then(() => {
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            // 데이터 추가 후 데이터 불러오기
+            loadData();
+          });
+      });
+  
+      // 데이터 불러오기
+      document.getElementById('loadDataBtn').addEventListener('click', function () {
+        loadData();
+      });
+  
+      function loadData() {
+        fetch('/data')
+          .then((response) => response.json())
+          .then((data) => {
+            const dataList = document.getElementById('dataResult');
+            dataList.innerHTML = '';
+  
+            data.forEach((item) => {
+              const itemDiv = document.createElement('div');
+              itemDiv.innerHTML = `<strong>ID:</strong> ${item.id}, <strong>이름:</strong> ${item.name}, <strong>이메일:</strong> ${item.email}`;
+              dataList.appendChild(itemDiv);
+            });
+          });
+      }
+  
+      // 데이터 삭제
+      document.getElementById('deleteForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const id = document.getElementById('deleteId').value;
+  
+        fetch(`/data/delete/${id}`, {
+          method: 'DELETE',
+        })
+          .then(() => {
+            document.getElementById('deleteId').value = '';
+            // 데이터 삭제 후 데이터 불러오기
+            loadData();
+          });
+      })
+  
+      // 페이지 로드 시 데이터 불러오기
+      loadData();
+    </script>
+</body>
+</html>
